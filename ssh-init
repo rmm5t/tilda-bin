@@ -1,0 +1,131 @@
+#!/bin/bash
+
+#
+# Copyright (c) 2006-2008 Ryan McGeary
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#
+
+# --------------------------------------------------
+
+#
+# USAGE:  ssh-init <ssh-args>
+#
+#   Example:  ssh-init bob@server.domain.com
+#   Example:  ssh-init -l bob -p 2222 server.domain.com
+#
+
+# --------------------------------------------------
+
+#
+# Initial config options
+#
+
+# The key_type is either rsa or dsa (rsa recommended)
+key_type=rsa
+
+# You probably want to leave this alone.  Keep single quotes as well unless
+# you want premature expansion (anything premature must be bad).
+remote_ssh_dir='~/.ssh'
+
+# This depends on the remote version of OpenSSH, but all the latest versions
+# are back to supporting good old 'authrorized_keys'.  Some older
+# implementations require 'authorized_keys2'.  Some really old implementations
+# only work with 'authorized_keys'.
+remote_auth_file=${remote_ssh_dir}/authorized_keys
+
+# --------------------------------------------------
+
+#
+# Test to see if an ssh key already exists.  If not, generate one now.
+#
+
+key_file=~/.ssh/id_${key_type}
+pub_key_file=${key_file}.pub
+
+if [ ! -f $key_file ]; then
+  echo "Local ssh key NOT found (${key_file}).  Generating now ..."
+  ssh-keygen -t $key_type -f $key_file
+else
+  echo "Local ssh key found (${key_file})."
+fi
+echo
+
+# --------------------------------------------------
+
+#
+# Push your public key to the remote server and append it to the
+# authorized_keys file if it's not already there.
+#
+
+ssh_args=$*
+pub_key=`cat ${pub_key_file}`
+
+init_script="
+mkdir -p ${remote_ssh_dir}; chmod 700 ${remote_ssh_dir};
+if grep -q '${pub_key}' ${remote_auth_file} &> /dev/null ; then
+  echo 'Public key already found in remote auth file (${remote_auth_file}).';
+else
+  echo 'Appending your public key to remote auth file (${remote_auth_file}) ...';
+  echo '${pub_key}' >> ${remote_auth_file};
+  chmod 600 ${remote_auth_file};
+fi;
+"
+
+if [ $# -gt 0 ]; then
+  ssh ${ssh_args} "${init_script}"
+else
+  echo 'Remote server not specified.  Quitting.'
+  exit 1
+fi
+echo
+
+# --------------------------------------------------
+
+#
+# Sync your .bashrc and .bash_profile file to the remote server, but only if
+# they differ.  Backups are created if necessary.
+#
+
+while [ $# -gt 1 ]; do
+  rsync_ssh_args="$rsync_ssh_args $1"
+  shift
+done
+rsync_ssh_host=$*
+
+echo 'Syncing ~/bin ...'
+rsync -arbL --exclude '*~' -e "ssh ${rsync_ssh_args}" ~/bin ${rsync_ssh_host}:~/
+
+echo 'Syncing ~/.bashrc ...'
+rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bashrc ${rsync_ssh_host}:~/
+
+echo 'Syncing ~/.bash_profile ...'
+rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bash_profile ${rsync_ssh_host}:~/
+
+echo 'Syncing ~/.bash_aliases ...'
+rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bash_aliases ${rsync_ssh_host}:~/
+
+echo
+
+# --------------------------------------------------
+
+echo 'Done.'
+exit 0
+
+# --------------------------------------------------

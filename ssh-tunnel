@@ -1,0 +1,11 @@
+#!/bin/bash
+
+: ${user:=${1:-$USER}}
+: ${host:=${2}}
+: ${sshport:=${3:-22}}
+: ${localport:=${4}}
+: ${remoteport:=${5}}
+: ${remotehost:=${6:-localhost}}
+
+echo "Tunneling to ${remotehost} via ${user}@${host}:${sshport}  :  ${localport} --> ${remoteport}"
+ssh -p${sshport} -N -L *:${localport}:${remotehost}:${remoteport} ${user}@${host}

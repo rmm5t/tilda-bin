@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#
+# Orginal idea from:
+# Command-line Growl Notifications - O'Reilly ONLamp Blog
+# http://www.oreillynet.com/onlamp/blog/2005/06/commandline_growl_notification.html
+#
+# Usage: specify "growlexec" before any command-line command and receive a
+# success or failure growl notification upon exit.
+#
+# Install: Requires growlnotify extra, available in the growl package (dmg).
+# In growl, I use the "music video" display for the growlnotifer.
+#
+
+tmpfile=`mktemp /tmp/tmp.XXXXXXXXXX`
+
+$* 2>&1| tee ${tmpfile}
+r=${PIPESTATUS[0]}
+
+lines=`tail -3 $tmpfile`
+
+if [ $r -eq 0 ]; then 
+  growlnotify -n growlexec -m  "$lines" "SUCCESS: $*" 
+else 
+  growlnotify -n growlexec -p2 -s -m "$lines" "FAILED: $*" 
+fi
+
+rm ${tmpfile}
