@@ -1429,6 +1429,7 @@ fi
 ############################################################
 
 # Custom for personal aliases
+complete -o default -o nospace -F _git g
 complete -o default -o nospace -F _git_checkout gco
 complete -o default -o nospace -F _git_cherry gu
 complete -o default -o nospace -F _git_push gp
