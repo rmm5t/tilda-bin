@@ -1435,3 +1435,4 @@ complete -o default -o nospace -F _git_cherry gu
 complete -o default -o nospace -F _git_push gp
 complete -o default -o nospace -F _git_pull gl
 complete -o default -o nospace -F _git_pull glr
+complete -o default -o nospace -F _git_branch grb
