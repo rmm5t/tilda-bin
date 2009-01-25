@@ -121,6 +121,10 @@ rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bash_profile ${rsync_ssh_host}:~/
 echo 'Syncing ~/.bash_aliases ...'
 rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bash_aliases ${rsync_ssh_host}:~/
 
+echo 'Touching ~/.bash_local ...'
+ssh ${ssh_args} "if [ -f ~/.bash_env ]; then mv ~/.bash_env ~/.bash_local; fi"
+ssh ${ssh_args} "touch ~/.bash_local"
+
 echo
 
 # --------------------------------------------------
