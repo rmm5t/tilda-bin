@@ -109,8 +109,8 @@ while [ $# -gt 1 ]; do
 done
 rsync_ssh_host=$*
 
-echo 'Syncing ~/bin ...'
-rsync -abrL --exclude '*~' --exclude ".svn/" --exclude ".git/" --exclude "private/" -e "ssh ${rsync_ssh_args}" ~/bin ${rsync_ssh_host}:~/
+# echo 'Syncing ~/bin ...'
+# rsync -abrL --exclude '*~' --exclude ".svn/" --exclude ".git/" --exclude "private/" -e "ssh ${rsync_ssh_args}" ~/bin ${rsync_ssh_host}:~/
 
 echo 'Syncing ~/.bashrc ...'
 rsync -abL -e "ssh ${rsync_ssh_args}" ~/.bashrc ${rsync_ssh_host}:~/
