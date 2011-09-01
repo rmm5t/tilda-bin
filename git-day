@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require "date"
+
+before = ARGV[0] ? Date.parse(ARGV[0]) : Date.today
+after = before - 1
+
+lines = `git log --author McGeary --after #{after} --before #{before} --format=%s`
+
+puts lines.split(/\n/).join("; ")
