@@ -1,0 +1,4 @@
+#!/bin/sh
+# by Jim Garvin
+
+git log --oneline -n $2 --author=$1 | awk '{ print $2; }' | sort | uniq -c | sort -r
