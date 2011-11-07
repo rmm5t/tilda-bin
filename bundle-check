@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo "REMOTE:"
-gem list -r $1 | grep "$1 ("
-echo "LOCAL:"
-bundle show | grep "$1 ("
