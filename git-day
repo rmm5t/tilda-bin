@@ -2,6 +2,7 @@
 
 require "time"
 require "date"
+require "shellwords"
 
 day = ARGV[0] ? Time.parse(ARGV[0]) : Time.parse(Date.today.to_s)
 day_in_secs = 24 * 60 * 60
@@ -17,4 +18,4 @@ puts "#{after} - #{before}"
 puts "-----------------------"
 puts summary
 
-system("echo #{summary.inspect} | pbcopy")
+system("echo #{Shellwords::shellescape(summary)} | pbcopy")
