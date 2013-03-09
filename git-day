@@ -7,11 +7,11 @@ require "shellwords"
 day = ARGV[0] ? Time.parse(ARGV[0]) : Time.parse(Date.today.to_s)
 day_in_secs = 24 * 60 * 60
 
-author = ARGV[1] || "McGeary"
+author = ARGV[1] || `git config user.email`
 after = day.iso8601
 before = (day + day_in_secs).iso8601
 
-lines = `git log --author #{author} --after #{after} --before #{before} --format=%s`
+lines = `git log --author "#{author}" --after #{after} --before #{before} --format=%s`
 summary = lines.split(/\n/).reverse.join("; ")
 
 puts "#{after} - #{before}"
