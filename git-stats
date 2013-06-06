@@ -15,6 +15,7 @@ Authors.each do |name|
   files_changed = insertions = deletions = 0
   open("| git log --shortstat --no-merges --author='#{name}' | grep 'files changed'").each do |line|
     matchdata = line.match(/(\d+) files changed, (\d+) insertions.* (\d+) deletions/)
+    next unless matchdata
     files_changed += matchdata[1].to_i
     insertions    += matchdata[2].to_i
     deletions     += matchdata[3].to_i
@@ -22,4 +23,3 @@ Authors.each do |name|
 
   printf(Format, name, files_changed, insertions, "-#{deletions}", insertions - deletions) unless files_changed == 0
 end
-
