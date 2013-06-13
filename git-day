@@ -11,7 +11,7 @@ author = (ARGV[1] || `git config user.email`).chomp
 after = day.iso8601
 before = (day + day_in_secs).iso8601
 
-lines = `git log --author "#{author}" --after #{after} --before #{before} --format=%s`
+lines = `git log --all --author "#{author}" --after #{after} --before #{before} --format=%s`
 summary = lines.split(/\n/).reverse.join("; ")
 
 puts "#{after} - #{before}"
