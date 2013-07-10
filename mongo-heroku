@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+# Borrowed and modified from https://github.com/dglittle/mongo-heroku
+
+remote_arg = "--remote #{ARGV[0]}" if ARGV[0]
+var = `heroku config #{remote_arg} 2> /dev/null`.strip
+
+if !var.empty? and m = var.match(/\bmongodb:\/\/(\S+):(\S+)@(\S+)/)
+  command = "mongo -u #{m[1]} -p #{m[2]} #{m[3]}"
+  puts command
+  exec command
+else
+  puts "Error. Run this command from an app folder."
+end
