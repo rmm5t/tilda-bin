@@ -1,14 +1,22 @@
 #!/usr/bin/env ruby
+#
+# Usage:
+#   mongo-heroku
+#   mongo-heroku --remote production
+#   mongo-heroku --app myapp
+#
+# Inspired by https://github.com/dglittle/mongo-heroku
 
-# Borrowed and modified from https://github.com/dglittle/mongo-heroku
+require "uri"
 
-remote_arg = "--remote #{ARGV[0]}" if ARGV[0]
-var = `heroku config #{remote_arg} 2> /dev/null`.strip
+args = ARGV.join(" ")
+config = `heroku config #{args}`
+exit 1 unless $?.success?
 
-if !var.empty? and m = var.match(/\bmongodb:\/\/(\S+):(\S+)@(\S+)/)
-  command = "mongo -u #{m[1]} -p #{m[2]} #{m[3]}"
-  puts command
-  exec command
+if config.match(/\b(mongodb:.+)$/)
+  db = URI.parse($1)
+  exec "mongo -u #{db.user} -p #{db.password} #{db.host}:#{db.port}#{db.path}"
 else
-  puts "Error. Run this command from an app folder."
+  $stderr.puts " !    No MongoDB URL found in heroku config."
+  exit 1
 end
