@@ -15,10 +15,10 @@ args = ARGV.join(" ")
 config = `heroku config #{args}`
 exit 1 unless $?.success?
 
-if config.match(/\b(mongodb:.+)$/)
-  db = URI.parse($1)
-  exec "mongo -u #{db.user} -p #{db.password} #{db.host}:#{db.port}#{db.path}"
-else
+unless config.match(/\b(mongodb:.+)$/)
   $stderr.puts " !    No MongoDB URL found in heroku config."
   exit 1
 end
+
+db = URI.parse($1)
+exec "mongo -u #{db.user} -p #{db.password} #{db.host}:#{db.port}#{db.path}"
