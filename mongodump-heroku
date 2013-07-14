@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+#
+# Runs a mongodump of the MongoDB database specified by a heroku config
+#
+# Usage:
+#   mongodump-heroku
+#   mongodump-heroku --remote production
+#   mongodump-heroku --app myapp
+
+require "uri"
+
+args = ARGV.join(" ")
+config = `heroku config #{args}`
+exit 1 unless $?.success?
+
+unless config.match(/\b(mongodb:.+)$/)
+  $stderr.puts " !    No MongoDB URL found in heroku config."
+  exit 1
+end
+
+db = URI.parse($1)
+db_name = db.path.gsub(/^\//, '')
+exec "mongodump -h #{db.host}:#{db.port} -d #{db_name} -u #{db.user} -p #{db.password}"

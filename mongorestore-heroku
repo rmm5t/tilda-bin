@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+#
+# Runs a mongorestore to the MongoDB database specified by a heroku config
+#
+# Usage:
+#   mongorestore-heroku
+#   mongorestore-heroku --remote production
+#   mongorestore-heroku --app myapp
+
+require "uri"
+
+args = ARGV.join(" ")
+app_info = `heroku apps:info #{args}`
+exit 1 unless $?.success?
+config = `heroku config #{args}`
+exit 1 unless $?.success?
+
+app_info.match(/^===\s+(.+)$/)
+app_name = $1
+
+unless config.match(/\b(mongodb:.+)$/)
+  $stderr.puts " !    No MongoDB URL found in heroku config."
+  exit 1
+end
+
+db = URI.parse($1)
+db_name = db.path.gsub(/^\//, '')
+
+$stderr.puts  " !    THIS WILL OVERWRITE EVERYTHING IN THE"
+$stderr.puts  " !    #{app_name} MONGO DATABASE LOCATED AT"
+$stderr.puts  " !    #{db.scheme}://#{db.host}:#{db.port}#{db.path}"
+$stderr.print " !    PLEASE ENTER \"#{app_name}\" TO CONFIRM > "
+response = $stdin.gets.chomp
+
+unless response == app_name
+  $stderr.puts  " !    CANCELLED. CONFIRMATION MISMATCH."
+  exit 1
+end
+
+exec "mongorestore -h #{db.host}:#{db.port} -d #{db_name} -u #{db.user} -p #{db.password} dump/#{db_name}"
