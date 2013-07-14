@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 #
+# Starts a mongo shell to MongoDB server specified by a heroku config
+#
 # Usage:
 #   mongo-heroku
 #   mongo-heroku --remote production
