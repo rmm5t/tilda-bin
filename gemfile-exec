@@ -1,0 +1,10 @@
+#!/bin/bash
+
+gemfile=$1
+shift
+
+export BUNDLE_GEMFILE="$gemfile"
+
+bundle check || bundle install --path vendor
+
+bundle exec $*
