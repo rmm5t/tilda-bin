@@ -18,15 +18,9 @@ end
 day_in_secs = 24 * 60 * 60
 day += days_shift * day_in_secs
 
+after = day
+before = (day + day_in_secs)
 author = (ARGV[1] || `git config user.email`).chomp
-after = day.iso8601
-before = (day + day_in_secs).iso8601
 
-lines = `git log --all --author "#{author}" --after #{after} --before #{before} --format=%s`
-summary = lines.split(/\n/).reverse.join("; ")
-
-puts "#{after} - #{before}"
-puts "-----------------------"
-puts summary
-
-system("echo #{Shellwords::shellescape(summary)} | pbcopy")
+command = ["git-summary", after.iso8601, before.iso8601, author].shelljoin
+puts `#{command}`
