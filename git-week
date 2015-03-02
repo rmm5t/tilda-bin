@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require "time"
+require "date"
+require "shellwords"
+require "active_support"
+require "active_support/core_ext/date"
+require "active_support/core_ext/time"
+require "active_support/core_ext/numeric"
+
+# Assumes Friday status reports
+Date.beginning_of_week = :saturday
+
+weeks_shift = 0
+day = Time.parse(Date.today.to_s)
+
+if ARGV[0] == "last"
+  weeks_shift = -1
+elsif ARGV[0].to_i <= 0
+  weeks_shift = ARGV[0].to_i
+else
+  day = Time.parse(ARGV[0])
+end
+
+day += weeks_shift.weeks
+
+after = day.beginning_of_week
+before = day.end_of_week
+author = (ARGV[1] || `git config user.email`).chomp
+
+command = ["git-summary", after.iso8601, before.iso8601, author].shelljoin
+puts `#{command}`

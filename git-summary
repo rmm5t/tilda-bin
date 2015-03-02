@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require "time"
+require "date"
+require "shellwords"
+
+after  = Time.parse(ARGV[0])
+before = Time.parse(ARGV[1])
+author = (ARGV[2] || `git config user.email`).chomp
+
+lines = `git log --reverse --all --author "#{author}" --after #{after.iso8601} --before #{before.iso8601} --format=%s`
+summary = lines.gsub(/^/, "- ") if lines.length > 0
+
+puts "#{after.to_date} - #{before.to_date}"
+puts "-----------------------"
+puts summary
+
+system("echo #{Shellwords::shellescape(summary)} | pbcopy")
