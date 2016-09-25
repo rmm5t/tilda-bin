@@ -28,44 +28,8 @@
 # USAGE:  ssh-init <ssh-args>
 #
 #   Example:  ssh-init bob@server.domain.com
-#   Example:  ssh-init -l bob -p 2222 server.domain.com
+#   Example:  ssh-init 2222 bob@server.domain.com
 #
-
-# --------------------------------------------------
-
-#
-# Initial config options
-#
-
-# The key_type is either rsa or dsa (rsa recommended)
-key_type=rsa
-
-# You probably want to leave this alone.  Keep single quotes as well unless
-# you want premature expansion (anything premature must be bad).
-remote_ssh_dir='~/.ssh'
-
-# This depends on the remote version of OpenSSH, but all the latest versions
-# are back to supporting good old 'authrorized_keys'.  Some older
-# implementations require 'authorized_keys2'.  Some really old implementations
-# only work with 'authorized_keys'.
-remote_auth_file=${remote_ssh_dir}/authorized_keys
-
-# --------------------------------------------------
-
-#
-# Test to see if an ssh key already exists.  If not, generate one now.
-#
-
-key_file=~/.ssh/id_${key_type}
-pub_key_file=${key_file}.pub
-
-if [ ! -f $key_file ]; then
-  echo "Local ssh key NOT found (${key_file}).  Generating now ..."
-  ssh-keygen -t $key_type -f $key_file
-else
-  echo "Local ssh key found (${key_file})."
-fi
-echo
 
 # --------------------------------------------------
 
@@ -75,26 +39,13 @@ echo
 #
 
 ssh_args=$*
-pub_key=`cat ${pub_key_file}`
-
-init_script="
-mkdir -p ${remote_ssh_dir}; chmod 700 ${remote_ssh_dir};
-if grep -q '${pub_key}' ${remote_auth_file} &> /dev/null ; then
-  echo 'Public key already found in remote auth file (${remote_auth_file}).';
-else
-  echo 'Appending your public key to remote auth file (${remote_auth_file}) ...';
-  echo '${pub_key}' >> ${remote_auth_file};
-  chmod 600 ${remote_auth_file};
-fi;
-"
 
 if [ $# -gt 0 ]; then
-  ssh ${ssh_args} "${init_script}"
+  ssh-copy-id ${ssh_args}
 else
   echo 'Remote server not specified.  Quitting.'
   exit 1
 fi
-echo
 
 # --------------------------------------------------
 
