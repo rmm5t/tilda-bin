@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# terminate after first line that fails
+set -e
+
+brew update
+brew outdated
+
+echo
+read -p "Continue? [y/N] " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
+
+brew upgrade
+
+services=`brew services list | grep ' started ' | cut -d' ' -f1`
+
+for service in $services; do
+  brew services restart $service
+done
