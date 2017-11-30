@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Usage:
+#
+#     gemfile-exec gemfiles/rails4.2.gemfile [command]
+#
+# Example
+#
+#     gemfile-exec gemfiles/rails4.2.gemfile rake spec
+
 gemfile=$1
 shift
 
