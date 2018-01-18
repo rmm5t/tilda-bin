@@ -10,3 +10,7 @@ Make sure the `~/bin` directory is part of your `PATH`. Add this to your
 [dotfiles repository](https://github.com/rmm5t/dotfiles))
 
     export PATH=~/bin:${PATH}
+
+## License
+
+[MIT License](https://rmm5t.mit-license.org/)
