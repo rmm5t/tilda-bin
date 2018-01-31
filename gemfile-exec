@@ -1,18 +1,56 @@
 #!/bin/bash
 
-# Usage:
+# Examples:
 #
-#     gemfile-exec gemfiles/rails4.2.gemfile [command]
-#
-# Example
-#
-#     gemfile-exec gemfiles/rails4.2.gemfile rake spec
+#     gemfile-exec -c "rake spec" gemfiles/rails4.2.gemfile
+#     gemfile-exec -c "rake spec" gemfiles/*.gemfile
 
-gemfile=$1
-shift
+function usage() {
+  echo "Usage: gemfile-exec -c <command> gemfile ..."
+  echo "       gemfile-exec gemfile ..."
+}
 
-export BUNDLE_GEMFILE="$gemfile"
+command=rake
 
-bundle check || bundle install --path vendor
+while getopts ":c:h" opt; do
+  case $opt in
+    c)
+      command=$OPTARG
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
 
-bundle exec $*
+# getopts is done; shift all processed options away
+shift $((OPTIND-1))
+
+if [[ $# -eq 0 ]] ; then
+  usage
+  exit 1
+fi
+
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+for gemfile in "$@"
+do
+  echo
+  echo -e "${GREEN}BUNDLE_GEMFILE=$gemfile   bundle exec ${command}${NC}"
+  echo -e "${GREEN}----------------------------------------------------------------------${NC}"
+  echo
+  export BUNDLE_GEMFILE="$gemfile"
+  bundle check || bundle install --path vendor
+  bundle exec ${command}
+done
