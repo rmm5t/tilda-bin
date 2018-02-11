@@ -3,16 +3,21 @@
 # terminate after first line that fails
 set -e
 
+function ask {
+  while read -e -t 1; do : ; done # absorb previous stdin
+  read -p "${1} [y/N] " -r        # perform actual prompt
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+}
+
 brew update
 echo
 
 brew outdated
 echo
 
-read -p "Continue? [y/N] " -n 1 -r
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
-fi
+ask "Continue?"
 
 brew upgrade
 echo
@@ -23,3 +28,11 @@ for service in $services; do
   brew services restart $service
   echo
 done
+
+brew cleanup --dry-run
+echo
+
+ask "Perform cleanup?"
+
+brew cleanup
+echo
