@@ -1,26 +1,39 @@
 #!/usr/bin/env ruby
 
-# Borrowed from Jim Garvin
+# Borrowed from Jim Garvin, but modified over the years
 # http://github.com/coderifous/dotfiles/blob/master/bin/git-stats.rb
 
-Authors = []
-Format = "%20s %10s %15s %12s %12s %10s\n"
-printf(Format, *%w(Author commits files-changed insertions deletions net))
+require "shellwords"
 
-open("| git shortlog -s -n").each do |line|
-  Authors << line.sub(/^\s*\d+\s*/, '').chomp
+format = "%24s %10s %10s %12s %12s %12s\n"
+printf(format, *%w(author commits touches inserts deletes net))
+puts "-" * 86
+
+authors = []
+open("| git shortlog -sn --no-merges").each do |line|
+  authors << line.sub(/^\s*\d+\s*/, '').chomp
 end
 
-Authors.each do |name|
-  commits = files_changed = insertions = deletions = 0
-  open("| git log --shortstat --no-merges --author='#{name}' | grep 'files changed'").each do |line|
-    matchdata = line.match(/(\d+) files changed, (\d+) insertions.* (\d+) deletions/)
-    next unless matchdata
-    commits       += 1
-    files_changed += matchdata[1].to_i
-    insertions    += matchdata[2].to_i
-    deletions     += matchdata[3].to_i
+all_commits = all_touches = all_inserts = all_deletes = 0
+authors.each do |name|
+  total_commits = total_touches = total_inserts = total_deletes = 0
+  open("| git log --shortstat --no-merges --author=#{name.shellescape} | grep -E 'files? changed'").each do |line|
+    touches = line.match(/(\d+) files? changed/)
+    inserts = line.match(/(\d+) insertion/)
+    deletes = line.match(/(\d+) deletion/)
+    total_commits += 1               if touches
+    total_touches += touches[1].to_i if touches
+    total_inserts += inserts[1].to_i if inserts
+    total_deletes += deletes[1].to_i if deletes
   end
 
-  printf(Format, name, commits, files_changed, insertions, "-#{deletions}", insertions - deletions) unless commits == 0
+  printf(format, name, total_commits, total_touches, total_inserts, -1 * total_deletes, total_inserts - total_deletes)
+
+  all_commits += total_commits
+  all_touches += total_touches
+  all_inserts += total_inserts
+  all_deletes += total_deletes
 end
+
+puts "-" * 86
+printf(format, authors.size, all_commits, all_touches, all_inserts, -1 * all_deletes, all_inserts - all_deletes)
