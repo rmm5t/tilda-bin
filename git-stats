@@ -14,26 +14,26 @@ open("| git shortlog -sn --no-merges").each do |line|
   authors << line.sub(/^\s*\d+\s*/, '').chomp
 end
 
-all_commits = all_touches = all_inserts = all_deletes = 0
+total_commits = total_touches = total_inserts = total_deletes = 0
 authors.each do |name|
-  total_commits = total_touches = total_inserts = total_deletes = 0
+  author_commits = author_touches = author_inserts = author_deletes = 0
   open("| git log --shortstat --no-merges --author=#{name.shellescape} | grep -E 'files? changed'").each do |line|
     touches = line.match(/(\d+) files? changed/)
     inserts = line.match(/(\d+) insertion/)
     deletes = line.match(/(\d+) deletion/)
-    total_commits += 1               if touches
-    total_touches += touches[1].to_i if touches
-    total_inserts += inserts[1].to_i if inserts
-    total_deletes += deletes[1].to_i if deletes
+    author_commits += 1               if touches
+    author_touches += touches[1].to_i if touches
+    author_inserts += inserts[1].to_i if inserts
+    author_deletes += deletes[1].to_i if deletes
   end
 
-  printf(format, name, total_commits, total_touches, total_inserts, -1 * total_deletes, total_inserts - total_deletes)
+  printf(format, name, author_commits, author_touches, author_inserts, -1 * author_deletes, author_inserts - author_deletes)
 
-  all_commits += total_commits
-  all_touches += total_touches
-  all_inserts += total_inserts
-  all_deletes += total_deletes
+  total_commits += author_commits
+  total_touches += author_touches
+  total_inserts += author_inserts
+  total_deletes += author_deletes
 end
 
 puts "-" * 86
-printf(format, authors.size, all_commits, all_touches, all_inserts, -1 * all_deletes, all_inserts - all_deletes)
+printf(format, authors.size, total_commits, total_touches, total_inserts, -1 * total_deletes, total_inserts - total_deletes)
