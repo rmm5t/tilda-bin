@@ -1,11 +1,40 @@
 #!/usr/bin/env ruby
 
-# Borrowed from Jim Garvin, but modified over the years
+# Borrowed from Jim Garvin, but heavily modified over the years
 # http://github.com/coderifous/dotfiles/blob/master/bin/git-stats.rb
 
+require "time"
+require "date"
 require "shellwords"
+require "active_support"
+require "active_support/core_ext/date"
+require "active_support/core_ext/time"
+require "active_support/core_ext/numeric"
+
+if ARGV[0].present?
+  weeks_shift = 0
+  day = Time.parse(Date.today.to_s)
+
+  if ARGV[0] == "last-week"
+    weeks_shift = -1
+  elsif ARGV[0] == "this-week"
+    weeks_shift = 0
+  elsif ARGV[0].to_i <= 0
+    weeks_shift = ARGV[0].to_i
+  else
+    day = Time.parse(ARGV[0])
+  end
+
+  day = Time.parse(Date.today.to_s)
+  day += weeks_shift.weeks
+  after = day.beginning_of_week
+  before = day.end_of_week
+end
+
+puts " Weekly Report: #{after.to_date} - #{before.to_date}" if after
 
 format = "%24s %10s %10s %12s %12s %12s\n"
+puts "-" * 86
 printf(format, *%w(author commits touches inserts deletes net))
 puts "-" * 86
 
@@ -14,10 +43,13 @@ open("| git shortlog -sn --no-merges").each do |line|
   authors << line.sub(/^\s*\d+\s*/, '').chomp
 end
 
+after_option  = ["--after", after.iso8601].shelljoin   if after
+before_option = ["--before", before.iso8601].shelljoin if before
+
 total_commits = total_touches = total_inserts = total_deletes = 0
 authors.each do |name|
   author_commits = author_touches = author_inserts = author_deletes = 0
-  open("| git log --shortstat --no-merges --author=#{name.shellescape} | grep -E 'files? changed'").each do |line|
+  open("| git log #{after_option} #{before_option} --shortstat --no-merges --author=#{name.shellescape} | grep -E 'files? changed'").each do |line|
     touches = line.match(/(\d+) files? changed/)
     inserts = line.match(/(\d+) insertion/)
     deletes = line.match(/(\d+) deletion/)
