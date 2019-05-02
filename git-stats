@@ -11,6 +11,10 @@ require "active_support/core_ext/date"
 require "active_support/core_ext/time"
 require "active_support/core_ext/numeric"
 
+def debug(msg)
+  puts msg if ENV["DEBUG"]
+end
+
 if ARGV[0].present?
   weeks_shift = 0
   day = Time.parse(Date.today.to_s)
@@ -31,25 +35,35 @@ if ARGV[0].present?
   before = day.end_of_week
 end
 
-puts " Weekly Report: #{after.to_date} - #{before.to_date}" if after
-
-format = "%24s %10s %10s %12s %12s %12s\n"
-puts "-" * 86
-printf(format, *%w(author commits touches inserts deletes net))
-puts "-" * 86
-
-authors = []
-open("| git shortlog -sn --no-merges").each do |line|
-  authors << line.sub(/^\s*\d+\s*/, '').chomp
-end
-
 after_option  = ["--after", after.iso8601].shelljoin   if after
 before_option = ["--before", before.iso8601].shelljoin if before
 
+authors = {}
+command = "git shortlog #{after_option} #{before_option} -sne --no-merges"
+debug(command)
+open("| #{command}").each do |line|
+  line =~ /\d+\s+(.+)\s+<(.+)>/
+  name = Regexp.last_match(1)
+  email = Regexp.last_match(2)
+  authors[email] = name
+  # authors[email] = "#{name} <#{email}>"
+end
+
+author_width = 1 + authors.values.map(&:length).max
+format = "%#{author_width}s %8s %8s %12s %12s %12s\n"
+line_width = 58 + author_width
+
+puts " Weekly Report: #{after.to_date} - #{before.to_date}" if after
+puts "-" * line_width
+printf(format, *%w(author commits touches inserts deletes net))
+puts "-" * line_width
+
 total_commits = total_touches = total_inserts = total_deletes = 0
-authors.each do |name|
+authors.each do |email, name|
   author_commits = author_touches = author_inserts = author_deletes = 0
-  open("| git log #{after_option} #{before_option} --shortstat --no-merges --author=#{name.shellescape} | grep -E 'files? changed'").each do |line|
+  command = "git log #{after_option} #{before_option} --shortstat --no-merges --author=#{email.shellescape} | grep -E 'files? changed'"
+  debug(command)
+  open("| #{command}").each do |line|
     touches = line.match(/(\d+) files? changed/)
     inserts = line.match(/(\d+) insertion/)
     deletes = line.match(/(\d+) deletion/)
@@ -67,5 +81,5 @@ authors.each do |name|
   total_deletes += author_deletes
 end
 
-puts "-" * 86
+puts "-" * line_width
 printf(format, authors.size, total_commits, total_touches, total_inserts, -1 * total_deletes, total_inserts - total_deletes)
