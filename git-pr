@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require "shellwords"
+
+upstream_branch = ARGV[0] || `git symbolic-ref --short refs/remotes/origin/HEAD`.chomp
+
+summary = `git log --reverse --format="- %s" #{upstream_branch}..HEAD`
+
+puts "#{upstream_branch}..HEAD"
+puts "-----------------------"
+puts summary
+
+system("echo #{Shellwords.shellescape(summary)} | pbcopy")
