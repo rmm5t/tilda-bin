@@ -51,7 +51,7 @@ open("| #{command}").each do |line|
   # authors[email] = "#{name} <#{email}>"
 end
 
-author_width = 1 + authors.values.map(&:length).max
+author_width = 1 + authors.values.map(&:length).max.to_i
 format = "%#{author_width}s %8s %8s %12s %12s %12s\n"
 line_width = 58 + author_width
 
