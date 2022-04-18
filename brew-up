@@ -32,7 +32,8 @@ done
 brew cleanup --dry-run
 echo
 
-ask "Perform cleanup?"
+echo 'Run `brew cleanup` if necessary.'
+# ask "Perform cleanup?"
 
-brew cleanup
-echo
+# brew cleanup
+# echo
