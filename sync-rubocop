@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# terminate after first line that fails
+set -e
+
+versions=$(bundle list | grep rubocop)
+
+gem install $(echo "$versions" | awk -F '[ ()]' '{print $4":"$6}')
