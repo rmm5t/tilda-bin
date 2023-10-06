@@ -4,7 +4,7 @@ require "shellwords"
 
 upstream_branch = ARGV[0] || `git symbolic-ref --short refs/remotes/origin/HEAD`.chomp
 
-summary = `git log --reverse --format="- %B" #{upstream_branch}..HEAD`
+summary = `git log --reverse --format="- %B" #{upstream_branch}..HEAD`.gsub(/^$\n/, "")
 
 puts "#{upstream_branch}..HEAD"
 puts "-----------------------"
