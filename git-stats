@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Borrowed from Jim Garvin, but heavily modified over the years
+# Originally borrowed from Jim Garvin, but heavily modified over the years
 # http://github.com/coderifous/dotfiles/blob/master/bin/git-stats.rb
 
 require "time"
@@ -8,6 +8,7 @@ require "date"
 require "shellwords"
 require "active_support"
 require "active_support/core_ext/date"
+require "active_support/core_ext/object"
 require "active_support/core_ext/time"
 require "active_support/core_ext/numeric"
 
