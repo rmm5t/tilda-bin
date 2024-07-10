@@ -7,8 +7,9 @@ require "shellwords"
 after  = Time.parse(ARGV[0])
 before = Time.parse(ARGV[1])
 author = (ARGV[2] || `git config user.email`).chomp
+format = (ARGV[3] || "- %s")
 
-summary = `git log --reverse --branches --remotes --tags --author "#{author}" --after #{after.iso8601} --before #{before.iso8601} --format="- %s"`
+summary = `git log --reverse --branches --remotes --tags --author "#{author}" --after #{after.iso8601} --before #{before.iso8601} --format="#{format}"`
 
 puts "#{after.to_date} - #{before.to_date}"
 puts "-----------------------"

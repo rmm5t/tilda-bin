@@ -22,5 +22,5 @@ after = day
 before = (day + day_in_secs)
 author = (ARGV[1] || `git config user.email`).chomp
 
-command = ["git-summary", after.iso8601, before.iso8601, author].shelljoin
+command = ["git-summary", after.iso8601, before.iso8601, author, "%s; "].shelljoin
 puts `#{command}`
