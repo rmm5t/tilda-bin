@@ -5,4 +5,4 @@ set -e
 
 versions=$(bundle list | grep rubocop)
 
-bundle update $(echo "$versions" | awk -F '[ ()]' '{print $4}')
+bundle update $@ $(echo "$versions" | awk -F '[ ()]' '{print $4}')
