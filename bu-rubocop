@@ -6,3 +6,5 @@ set -e
 versions=$(bundle list | grep rubocop)
 
 bundle update $@ $(echo "$versions" | awk -F '[ ()]' '{print $4}')
+
+bundle exec rubocop --regenerate-todo
