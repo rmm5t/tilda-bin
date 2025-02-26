@@ -1,10 +1,4 @@
 #!/usr/bin/env bash -x
 
-# terminate after first line that fails
-set -e
-
-versions=$(bundle list | grep rubocop)
-
-bundle update $@ $(echo "$versions" | awk -F '[ ()]' '{print $4}')
-
+bu-gems rubocop
 bundle exec rubocop --regenerate-todo
