@@ -2,3 +2,4 @@
 
 bu-gems rubocop
 bundle exec rubocop --regenerate-todo
+sync-rubocop
